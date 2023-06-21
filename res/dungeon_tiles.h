@@ -10,7 +10,7 @@
   Compression          : None.
   Counter              : None.
   Tile size            : 8 x 8
-  Tiles                : 0 to 78
+  Tiles                : 0 to 84
 
   Palette colors       : Included.
   SGB Palette          : None.
@@ -98,6 +98,6 @@
 #define dungeon_tilesCGBPal7c2 6596
 #define dungeon_tilesCGBPal7c3 5344
 /* Start of tile array. */
-extern const const unsigned char dungeon_tiles[];
+extern unsigned char dungeon_tiles[];
 
 /* End of DUNGEON_TILES.H */

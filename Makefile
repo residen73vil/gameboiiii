@@ -5,26 +5,43 @@
 
 # If you move this project you can change the directory 
 # to match your GBDK root directory (ex: GBDK_HOME = "C:/GBDK/"
-GBDK_HOME = ../../../
+$(info buildsystem = $(shell uname | cut -d "-" -f 1))
+ifeq ($(shell uname | cut -d "-" -f 1 ), MINGW64_NT)
+    GBDK_HOME = C:/PortableApps/gbdk/
+else
+    GBDK_HOME = ../../
+endif
 
 LCC = $(GBDK_HOME)bin/lcc 
+PNG2ASSET = $(GBDK_HOME)bin/png2asset
 
 # You can set flags for LCC here
 # For example, you can uncomment the line below to turn on debug output
 # LCCFLAGS = -debug
 
 # You can set the name of the .gb ROM file here
-PROJECTNAME    = Example
+PROJECTNAME    = beast
 
 SRCDIR      = src
 OBJDIR      = obj
 RESDIR      = res
+ASSETS      = assets
+RESOBJSRC   = obj/res
+IMGPNGS     = $(foreach dir,$(ASSETS),$(notdir $(wildcard $(dir)/*.png)))
+IMGSOURCES  = $(IMGPNGS:%.png=$(RESOBJSRC)/%.c)
+IMGOBJS     = $(IMGSOURCES:$(RESOBJSRC)/%.c=$(OBJDIR)/%.o)
 BINS	    = $(OBJDIR)/$(PROJECTNAME).gb
 CSOURCES    = $(foreach dir,$(SRCDIR),$(notdir $(wildcard $(dir)/*.c))) $(foreach dir,$(RESDIR),$(notdir $(wildcard $(dir)/*.c)))
 ASMSOURCES  = $(foreach dir,$(SRCDIR),$(notdir $(wildcard $(dir)/*.s)))
 OBJS       = $(CSOURCES:%.c=$(OBJDIR)/%.o) $(ASMSOURCES:%.s=$(OBJDIR)/%.o)
 
+
 all:	prepare $(BINS)
+
+
+$(RESOBJSRC)/%.c:	$(ASSETS)/%.png
+	$(PNG2ASSET) $< -spr8x8 -tiles_only -c $@
+
 
 compile.bat: Makefile
 	@echo "REM Automatically generated from Makefile" > compile.bat
@@ -38,6 +55,9 @@ $(OBJDIR)/%.o:	$(SRCDIR)/%.c
 $(OBJDIR)/%.o:	$(RESDIR)/%.c
 	$(LCC) $(LCCFLAGS) -c -o $@ $<
 
+$(OBJDIR)/%.o:	$(RESOBJSRC)/%.c
+	$(LCC) $(LCCFLAGS) -c -o $@ $<
+
 # Compile .s assembly files in "src/" to .o object files
 $(OBJDIR)/%.o:	$(SRCDIR)/%.s
 	$(LCC) $(LCCFLAGS) -c -o $@ $<
@@ -49,12 +69,22 @@ $(OBJDIR)/%.s:	$(SRCDIR)/%.c
 
 # Link the compiled object files into a .gb ROM file
 $(BINS):	$(OBJS)
-	$(LCC) $(LCCFLAGS) -o $(BINS) $(OBJS)
+	$(LCC) $(LCCFLAGS) -o $(BINS) $(IMGOBJS) $(OBJS)
+
+$(IMGOBJS): $(IMGSOURCES)
+	$(LCC) $(LCCFLAGS) -c -o $@ $<
+
+$(RESDIR)/%.o: $(RESOBJSRC)/%.c
+
+$(OBJS):	$(IMGOBJS)
 
 prepare:
-	mkdir -p $(OBJDIR)
+	mkdir -p $(OBJDIR) $(RESOBJSRC) 
 
 clean:
 #	rm -f  *.gb *.ihx *.cdb *.adb *.noi *.map
 	rm -f  $(OBJDIR)/*.*
+	rm -f  $(RESOBJSRC)/*.*
+	rm -rf  $(RESOBJSRC)
+
 

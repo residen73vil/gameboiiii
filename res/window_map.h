@@ -1,13 +1,13 @@
 /*
 
- DUNGEON_MAP.H
+ WINDOW_MAP.H
 
  Map Include File.
 
  Info:
    Section       : 
    Bank          : 0
-   Map size      : 32 x 32
+   Map size      : 10 x 10
    Tile set      : dungeon_32x32.gbr
    Plane count   : 1 plane (8 bits)
    Plane order   : Planes are continues
@@ -18,11 +18,11 @@
 
 */
 
-#define dungeon_mapWidth 32
-#define dungeon_mapHeight 32
-#define dungeon_mapBank 0
+#define window_mapWidth 10
+#define window_mapHeight 10
+#define window_mapBank 0
 
-#define dungeon_map dungeon_mapPLN0
-extern unsigned char dungeon_mapPLN0[];
+#define window_map window_mapPLN0
+extern unsigned char window_mapPLN0[];
 
-/* End of DUNGEON_MAP.H */
+/* End of WINDOW_MAP.H */
