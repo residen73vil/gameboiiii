@@ -8,12 +8,15 @@
 $(info buildsystem = $(shell uname | cut -d "-" -f 1))
 ifeq ($(shell uname | cut -d "-" -f 1 ), MINGW64_NT)
     GBDK_HOME = C:/PortableApps/gbdk/
+else ifeq ($(shell uname | cut -d "-" -f 1 ), MSYS_NT)
+    GBDK_HOME = G:/2/gbdk/
 else
     GBDK_HOME = ../../
 endif
 
 LCC = $(GBDK_HOME)bin/lcc 
 PNG2ASSET = $(GBDK_HOME)bin/png2asset
+TEXT2ASSET = tools/text2tile_addreses.py
 
 # You can set flags for LCC here
 # For example, you can uncomment the line below to turn on debug output
@@ -28,7 +31,9 @@ RESDIR      = res
 ASSETS      = assets
 RESOBJSRC   = obj/res
 IMGPNGS     = $(foreach dir,$(ASSETS),$(notdir $(wildcard $(dir)/*.png)))
+TEXTASSETS     = $(foreach dir,$(ASSETS),$(notdir $(wildcard $(dir)/*.txt)))
 IMGSOURCES  = $(IMGPNGS:%.png=$(RESOBJSRC)/%.c)
+TEXTASSETSSOURSES = $(TEXTASSETS:%.txt=$(RESOBJSRC)/%.h)
 IMGOBJS     = $(IMGSOURCES:$(RESOBJSRC)/%.c=$(OBJDIR)/%.o)
 BINS	    = $(OBJDIR)/$(PROJECTNAME).gb
 CSOURCES    = $(foreach dir,$(SRCDIR),$(notdir $(wildcard $(dir)/*.c))) $(foreach dir,$(RESDIR),$(notdir $(wildcard $(dir)/*.c)))
@@ -42,13 +47,16 @@ all:	prepare $(BINS)
 $(RESOBJSRC)/%.c:	$(ASSETS)/%.png
 	$(PNG2ASSET) $< -spr8x8 -tiles_only -c $@
 
+$(RESOBJSRC)/%.h:	$(ASSETS)/%.txt
+	$(TEXT2ASSET)  $< $(RESOBJSRC)/
+
 
 compile.bat: Makefile
 	@echo "REM Automatically generated from Makefile" > compile.bat
 	@make -sn | sed y/\\//\\\\/ | grep -v make >> compile.bat
 
 # Compile .c files in "src/" to .o object files
-$(OBJDIR)/%.o:	$(SRCDIR)/%.c
+$(OBJDIR)/%.o:	$(SRCDIR)/%.c 
 	$(LCC) $(LCCFLAGS) -c -o $@ $<
 
 # Compile .c files in "res/" to .o object files
@@ -74,11 +82,11 @@ $(BINS):	$(OBJS)
 $(IMGOBJS): $(IMGSOURCES)
 	$(LCC) $(LCCFLAGS) -c -o $@ $<
 
-$(RESDIR)/%.o: $(RESOBJSRC)/%.c
+$(RESDIR)/%.o: $(RESOBJSRC)/%.c 
 
-$(OBJS):	$(IMGOBJS)
+$(OBJS):	$(IMGOBJS) $(TEXTASSETSSOURSES)
 
-prepare:
+prepare: 
 	mkdir -p $(OBJDIR) $(RESOBJSRC) 
 
 clean:
