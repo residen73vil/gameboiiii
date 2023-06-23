@@ -1,4 +1,7 @@
-var=test1234
-var2 = test12+-
-var3 =asb;h[dagkmd]
-var4= aafssadf
+# This is a comment
+# Put text constanst here on into others text files in this (assets/) directory
+# they will be interpreted into corresponding .h files (in obj\res directory) 
+# by means of tools/text2tile_addreses.py 
+
+test_line = 0123456789ABCDEF
+test_text = abcdefghijklmnopqrstuvwxyz0123456789&'()*+,-./:;

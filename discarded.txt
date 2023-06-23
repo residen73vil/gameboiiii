@@ -1,0 +1,10 @@
+//Some discarded staff that may come in handy lately
+
+void puttext(const uint8_t x, const uint8_t y, const uint8_t w, const uint8_t h, const uchar_t* str){
+	uint8_t * addr =  (uint8_t*)(VRAM_MAP_WIN + x + y * VRAM_MAP_WIDTH);
+	for (uint8_t i = 0; i < h; i++){
+		addr =  (uint8_t*)(VRAM_MAP_WIN + x + (y+i)* VRAM_MAP_WIDTH);
+		for (uint8_t j = 0; j < w; j++)
+			*(addr++)=*(str++);
+	}
+}
