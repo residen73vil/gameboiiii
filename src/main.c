@@ -6,6 +6,7 @@
 #include "../obj/res/font.h"
 #include "../obj/res/strings.h"
 #include "text_output_utils.h"
+#include "menu_utils.h"
 
 
 #define GAME_BKG_SCROLL_STEP 2
@@ -13,16 +14,59 @@
 #define VRAM_MAP_BKG 0x9800
 #define VRAM_MAP_WIN 0x9C00
 
-enum game_states { //to be changed
-  TRANSITION_TO_TITLE,
-  TITLE,
-  TRANSITION_TO_TUTORIAL,
-  TUTORIAL,
-  MAIN,
-  FAIL,
-  TRANSITION_TO_RETRY,
-  RETRY
+enum GameState { //to be changed
+	MAINMENU = 1,
+	OPTIONS = 1 << 1,
 };
+typedef enum GameState EGameState;
+
+struct ButtonsActions {
+
+	void (*j_start)();
+	void (*j_select)(); 
+	void (*j_a)();
+	void (*j_b)(); 
+	void (*j_up)(); 
+	void (*j_down)(); 
+	void (*j_left)(); 
+	void (*j_right)();
+
+} buttons_actions;
+typedef struct ButtonsActions sButtonsActions;
+
+sButtonsActions menu_actions = { menu_action_chouse, menu_action_chouse, menu_action_chouse, 0, menu_action_up, menu_action_down, 0, 0};
+
+
+
+int menu_item_selected = 0;
+int menu_items_count = 6;
+sMenuButton menu_selected_items[] = { 
+	{main_menu, LENGTH_MAIN_MENU, menu_action_main}, 
+	{options, LENGTH_OPTIONS, menu_action_opt},
+	{main_menu, LENGTH_MAIN_MENU, menu_action_main},   
+};
+
+sMenu current_menu1 = { 2, 1, 7, 0, 0, 0x53, 0x52, /*{ 0, 0, 0, 0, 0, 0 },*/ 3, 0, { 
+	{main_menu, LENGTH_MAIN_MENU, menu_action_main}, 
+	{options, LENGTH_OPTIONS, menu_action_opt},
+	{main_menu, LENGTH_MAIN_MENU, menu_action_main}
+
+}};
+
+
+void menu_action_main(){
+	print_line_win(1, 15, LENGTH_MAIN_MENU, main_menu);
+}  
+void menu_action_opt(){
+	print_line_win(1, 15, LENGTH_OPTIONS, options);
+}  
+
+
+
+
+
+
+
 
 void init_gfx() {
     // Load Background tiles and then map
@@ -33,10 +77,9 @@ DISPLAY_OFF;
     set_win_tiles(0, 0, 10u, 10u, window_mapPLN0);
 
 	//tesing 
-    set_win_tiles(1, 1, 6, 8, test_text);
-	print_line_win(1, 0, LENGTH_TEST_LINE, test_line);
+    //set_win_tiles(1, 1, 6, 8, test_text);
+	//print_line_win(1, 0, LENGTH_TEST_LINE, test_line);
 
-	print_int8hex_win(10, 3, 10);
 	print_int8hex_win(10, 4, 0xFFu);
 	print_int8hex_win(10, 5, 0);
 	print_int8hex_win(10, 6, 255);
@@ -46,31 +89,55 @@ DISPLAY_ON;
     SHOW_WIN;
 }
 
+EGameState current_game_state = MAINMENU;
+EGameState previous_game_state = OPTIONS;
 
+
+EGameState change_game_state(EGameState new_state)
+{
+	EGameState prev = current_game_state;
+	current_game_state = new_state;
+	return prev;
+}
 
 uint8_t joy = 0;
+uint8_t joy_presed = 0;
 
 void main(void)
 {
 	init_gfx();
-
+	menu_init(&current_menu1);
+	menu_show();
+	buttons_actions = menu_actions;
 
     // Loop forever
     while(1) {
         
 
 		// Game main loop processing goes here
+		switch (current_game_state)
+		{
+			case MAINMENU:
+				print_line_win(1, 0, LENGTH_MAIN_MENU, main_menu);
+				break;
+			case OPTIONS:
+				print_line_win(1, 0, LENGTH_OPTIONS, options);
+				break;
+
+		}
         joy = joypad();
-        if (joy & J_START)
-            scroll_bkg(1,0);
+        if (joy & J_START && !(joy_presed &J_START) )
+            if (buttons_actions.j_start)  (*buttons_actions.j_start)();
         if (joy & J_LEFT )
-            scroll_win(1,0);
+            if (buttons_actions.j_left)  (*buttons_actions.j_left)();
         if (joy & J_RIGHT)
-            scroll_win(-1,0);
-        if (joy & J_UP)
-            scroll_win(0,1);
-        if (joy & J_DOWN)
-            scroll_win(0,-1);
+            if (buttons_actions.j_right)  (*buttons_actions.j_right)();
+        if (joy & J_UP && !(joy_presed &J_UP))
+           if (buttons_actions.j_up)  (*buttons_actions.j_up)();
+        if (joy & J_DOWN && !(joy_presed &J_DOWN))
+            if (buttons_actions.j_down)  (*buttons_actions.j_down)();
+		joy_presed = joy;
+		print_int8hex_win(12, 3, menu_item_selected);
 
 		// Done processing, yield CPU and wait for start of next frame
         wait_vbl_done();

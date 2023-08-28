@@ -5,3 +5,5 @@
 
 test_line = 0123456789ABCDEF
 test_text = abcdefghijklmnopqrstuvwxyz0123456789&'()*+,-./:;
+main_menu = MainMenu
+options = Options
