@@ -46,9 +46,18 @@ sMenuButton menu_selected_items[] = {
 	{main_menu, LENGTH_MAIN_MENU, menu_action_main},   
 };
 
-sMenu current_menu1 = { 2, 1, 7, 0, 0, 0x53, 0x52, /*{ 0, 0, 0, 0, 0, 0 },*/ 3, 0, { 
+sMenu current_menu1 = { 5, 2, 10, 0, 0, 0x53, 0x01, { 0x2b, 0x2c, 0x2d, 0x3b, 0x31, 0x33 }, 3, 0, 0, { 
 	{main_menu, LENGTH_MAIN_MENU, menu_action_main}, 
 	{options, LENGTH_OPTIONS, menu_action_opt},
+	{main_menu, LENGTH_MAIN_MENU, menu_action_main}
+
+}};
+
+sMenu current_menu2 = { 3, 6, 10, 0, 0, 0x53, 0x01, { 0x22, 0x22, 0x2d, 0x33, 0x34, 0x35 }, 5, 0, 0, { 
+	{main_menu, LENGTH_MAIN_MENU, menu_action_main}, 
+	{options, LENGTH_OPTIONS, menu_action_opt},
+	{main_menu, LENGTH_MAIN_MENU, menu_action_main},
+	{main_menu, LENGTH_MAIN_MENU, menu_action_main},
 	{main_menu, LENGTH_MAIN_MENU, menu_action_main}
 
 }};
@@ -56,9 +65,12 @@ sMenu current_menu1 = { 2, 1, 7, 0, 0, 0x53, 0x52, /*{ 0, 0, 0, 0, 0, 0 },*/ 3, 
 
 void menu_action_main(){
 	print_line_win(1, 15, LENGTH_MAIN_MENU, main_menu);
+	menu_close();
 }  
-void menu_action_opt(){
+void menu_action_opt(){	
 	print_line_win(1, 15, LENGTH_OPTIONS, options);
+	menu_init(&current_menu2);
+	menu_show();
 }  
 
 

@@ -5,7 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-typedef char tile;
+typedef char Tile;
 struct MenuButton {
 
 	char* name;
@@ -24,14 +24,16 @@ struct Menu {
 	int max_width;
 	char* name;
 	int name_len;
-	tile pointer;
-	tile blank;
-	//tile borders[6];
+	Tile pointer;
+	Tile blank;
+	Tile borders[6];
 	int items_count;
 	int item_selected;
+	struct Menu* prev_menu;
 	sMenuButton items[];
 
 };
+
 typedef struct Menu sMenu;
 
 void menu_show();
