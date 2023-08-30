@@ -38,13 +38,6 @@ sButtonsActions menu_actions = { menu_action_chouse, menu_action_chouse, menu_ac
 
 
 
-int menu_item_selected = 0;
-int menu_items_count = 6;
-sMenuButton menu_selected_items[] = { 
-	{main_menu, LENGTH_MAIN_MENU, menu_action_main}, 
-	{options, LENGTH_OPTIONS, menu_action_opt},
-	{main_menu, LENGTH_MAIN_MENU, menu_action_main},   
-};
 
 sMenu current_menu1 = { 5, 2, 10, 0, 0, 0x53, 0x01, { 0x2b, 0x2c, 0x2d, 0x3b, 0x31, 0x33 }, 3, 0, 0, { 
 	{main_menu, LENGTH_MAIN_MENU, menu_action_main}, 
@@ -53,7 +46,8 @@ sMenu current_menu1 = { 5, 2, 10, 0, 0, 0x53, 0x01, { 0x2b, 0x2c, 0x2d, 0x3b, 0x
 
 }};
 
-sMenu current_menu2 = { 3, 6, 10, 0, 0, 0x53, 0x01, { 0x22, 0x22, 0x2d, 0x33, 0x34, 0x35 }, 5, 0, 0, { 
+//                      x  y  mw  name  point blank { tl    mid   tr    vert  bl    br     len select   prev_menu
+sMenu current_menu2 = { 3, 6, 10, options, LENGTH_OPTIONS, 0x53, 0x01, { 0x22, 0x22, 0x2d, 0x33, 0x34, 0x35 }, 5, 0, 0, { 
 	{main_menu, LENGTH_MAIN_MENU, menu_action_main}, 
 	{options, LENGTH_OPTIONS, menu_action_opt},
 	{main_menu, LENGTH_MAIN_MENU, menu_action_main},
@@ -149,7 +143,6 @@ void main(void)
         if (joy & J_DOWN && !(joy_presed &J_DOWN))
             if (buttons_actions.j_down)  (*buttons_actions.j_down)();
 		joy_presed = joy;
-		print_int8hex_win(12, 3, menu_item_selected);
 
 		// Done processing, yield CPU and wait for start of next frame
         wait_vbl_done();
