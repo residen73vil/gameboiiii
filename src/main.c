@@ -7,6 +7,7 @@
 #include "../obj/res/strings.h"
 #include "text_output_utils.h"
 #include "menu_utils.h"
+#include "state.h"
 
 
 #define GAME_BKG_SCROLL_STEP 2
@@ -14,25 +15,7 @@
 #define VRAM_MAP_BKG 0x9800
 #define VRAM_MAP_WIN 0x9C00
 
-enum GameState { //to be changed
-	MAINMENU = 1,
-	OPTIONS = 1 << 1,
-};
-typedef enum GameState EGameState;
 
-struct ButtonsActions {
-
-	void (*j_start)();
-	void (*j_select)(); 
-	void (*j_a)();
-	void (*j_b)(); 
-	void (*j_up)(); 
-	void (*j_down)(); 
-	void (*j_left)(); 
-	void (*j_right)();
-
-} buttons_actions;
-typedef struct ButtonsActions sButtonsActions;
 
 sButtonsActions menu_actions = { menu_action_chouse, menu_action_chouse, menu_action_chouse, 0, menu_action_up, menu_action_down, 0, 0};
 
@@ -95,33 +78,56 @@ DISPLAY_ON;
     SHOW_WIN;
 }
 
-EGameState current_game_state = MAINMENU;
-EGameState previous_game_state = OPTIONS;
+//EGameState current_game_state = MAINMENU;
+//EGameState previous_game_state = OPTIONS;
 
 
-EGameState change_game_state(EGameState new_state)
+/*EGameState change_game_state(EGameState new_state)
 {
 	EGameState prev = current_game_state;
 	current_game_state = new_state;
 	return prev;
+}*/
+
+
+void test_task(void* object){
+	print_int8hex_win(2, 10, (*((int*)object))++);
 }
 
-uint8_t joy = 0;
-uint8_t joy_presed = 0;
+void test_task2(void* object){
+	print_int8hex_win(2, 15, (*((int*)object))++);
+}
+
+void test_task3(void* object){
+	print_int8hex_win(5, 15, (*((int*)object))++);
+}
+int test_task_counter = 0;
+sTask ft = {100, 100,  test_task, &test_task_counter};
+
+
+int test_task_counter2 = 0;
+sTask bgt = {10, 10,  test_task2, &test_task_counter2};
+
+int test_task_counter3 = 0;
+sTask bgt2 = {200, 200,  test_task3, &test_task_counter3};
+
 
 void main(void)
 {
 	init_gfx();
 	menu_init(&current_menu1);
 	menu_show();
-	buttons_actions = menu_actions;
+	set_buttons_actions(&menu_actions);
+	set_foreground_task(&ft);
+	add_background_task(&bgt);
+	add_background_task(&bgt2);
 
     // Loop forever
     while(1) {
         
 
 		// Game main loop processing goes here
-		switch (current_game_state)
+		/*switch (current_game_state)
 		{
 			case MAINMENU:
 				print_line_win(1, 0, LENGTH_MAIN_MENU, main_menu);
@@ -130,19 +136,11 @@ void main(void)
 				print_line_win(1, 0, LENGTH_OPTIONS, options);
 				break;
 
-		}
-        joy = joypad();
-        if (joy & J_START && !(joy_presed &J_START) )
-            if (buttons_actions.j_start)  (*buttons_actions.j_start)();
-        if (joy & J_LEFT )
-            if (buttons_actions.j_left)  (*buttons_actions.j_left)();
-        if (joy & J_RIGHT)
-            if (buttons_actions.j_right)  (*buttons_actions.j_right)();
-        if (joy & J_UP && !(joy_presed &J_UP))
-           if (buttons_actions.j_up)  (*buttons_actions.j_up)();
-        if (joy & J_DOWN && !(joy_presed &J_DOWN))
-            if (buttons_actions.j_down)  (*buttons_actions.j_down)();
-		joy_presed = joy;
+		}*/
+
+		poll_buttons();
+		run_foreground_task();
+		run_background_tasks();
 
 		// Done processing, yield CPU and wait for start of next frame
         wait_vbl_done();
