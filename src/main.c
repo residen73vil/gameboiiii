@@ -16,8 +16,8 @@
 #define VRAM_MAP_WIN 0x9C00
 
 
-
-sButtonsActions menu_actions = { menu_action_chouse, menu_action_chouse, menu_action_chouse, 0, menu_action_up, menu_action_down, 0, 0};
+#define NOACTION 0
+sButtonsActions menu_actions = { menu_action_chouse, 20, 0, menu_action_chouse, 5, 0, menu_action_chouse, 60, 0, NOACTION , 0,0, menu_action_up, 10, 0, menu_action_down, 40, 0, NOACTION,0,0, NOACTION,0,0,};
 
 
 
@@ -92,10 +92,12 @@ DISPLAY_ON;
 
 void test_task(void* object){
 	print_int8hex_win(2, 10, (*((int*)object))++);
+	scroll_bkg(-1, 0);
 }
 
 void test_task2(void* object){
 	print_int8hex_win(2, 15, (*((int*)object))++);
+	scroll_bkg(0, -1);
 }
 
 void test_task3(void* object){

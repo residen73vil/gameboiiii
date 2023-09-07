@@ -15,26 +15,43 @@ inline void set_buttons_actions(sButtonsActions*  actions){
 	 buttons_actions = actions;
 }
 
-
+/// Check if a button is pressed and perform associated action.
+/// @param NAMEUPPER is part of J_{NAMEUPPER} def 
+/// @param NAMELOWER is lowercase name to be used in struct fields names 
+#define CHECKBUTTON(NAMEUPPER,NAMELOWER)  if (joy & J_##NAMEUPPER \
+				&& (buttons_actions->j_##NAMELOWER##_timeout_counter <= 0) \
+			) \
+	     if (buttons_actions->j_##NAMELOWER){ \
+		   	 (*buttons_actions->j_##NAMELOWER)(); \
+			 buttons_actions->j_##NAMELOWER##_timeout_counter = buttons_actions->j_##NAMELOWER##_timeout; \
+		 }	
 void poll_buttons()
 {
     joy = joypad();
-    if (joy & J_START && !(joy_presed &J_START) )
-        if (buttons_actions->j_start)  (*buttons_actions->j_start)();
-    if (joy & J_LEFT )
-        if (buttons_actions->j_left)  (*buttons_actions->j_left)();
-    if (joy & J_RIGHT)
-        if (buttons_actions->j_right)  (*buttons_actions->j_right)();
-    if (joy & J_UP && !(joy_presed &J_UP))
-       if (buttons_actions->j_up)  (*buttons_actions->j_up)();
-    if (joy & J_DOWN && !(joy_presed &J_DOWN))
-        if (buttons_actions->j_down)  (*buttons_actions->j_down)();
+	CHECKBUTTON(START, start);
+	CHECKBUTTON(LEFT, left); 
+	CHECKBUTTON(RIGHT, right);
+	CHECKBUTTON(UP, up);
+	CHECKBUTTON(DOWN, down);
+	CHECKBUTTON(A, a);
+	CHECKBUTTON(B, b);
+	CHECKBUTTON(SELECT, select);
+
+	// check and update counters for buttons cooldowns 
+	if (buttons_actions->j_start_timeout_counter >=0) buttons_actions->j_start_timeout_counter--;
+	if (buttons_actions->j_left_timeout_counter >=0) buttons_actions->j_left_timeout_counter--;
+	if (buttons_actions->j_right_timeout_counter >=0) buttons_actions->j_right_timeout_counter--;
+	if (buttons_actions->j_up_timeout_counter >=0) buttons_actions->j_up_timeout_counter--;
+	if (buttons_actions->j_down_timeout_counter >=0) buttons_actions->j_down_timeout_counter--;
+	if (buttons_actions->j_a_timeout_counter >=0) buttons_actions->j_a_timeout_counter--;
+	if (buttons_actions->j_b_timeout_counter >=0) buttons_actions->j_b_timeout_counter--;
+	if (buttons_actions->j_select_timeout_counter >=0) buttons_actions->j_select_timeout_counter--;
 	joy_presed = joy; //todo: add ignore mask joy & ignore mask
 }
 
 void run_foreground_task(){
 	if (foreground_task == 0)
-		return;
+		return; // if there is no task just return (shouldn't happen!)
 	foreground_task->counter--;
 	print_int8hex_win(2, 11, foreground_task->counter);
 	if (foreground_task->counter <= 0) {
@@ -46,7 +63,7 @@ void run_foreground_task(){
 void run_background_tasks(){
 	if (number_of_bg_tasks <= 0)
 		return;
-	for (int i = 0; i < number_of_bg_tasks; i++)
+	for (int i = 0; i < number_of_bg_tasks; i++) //run each action in the list
 	{
 		background_tasks[i]->counter--;
 		print_int8hex_win(2, 13, background_tasks[i]->counter);
@@ -61,7 +78,10 @@ void set_foreground_task(sTask* task){
 	foreground_task = task;
 }
 
+
 void add_background_task(sTask* task){
+	//todo: make it so index of the task is returned, so that it could be deleted
+	// also change the whole structure of the list to make it possible
 	background_tasks[number_of_bg_tasks] = task;
 	number_of_bg_tasks++;
 }
